@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2023/4/27 16:07
 # @Author  : lan
-# @File    : model_all.py
 # @Software: PyCharm
 import torch
 
@@ -71,7 +69,6 @@ class GCN(torch.nn.Module):
 
         return h + res
 
-
 class GAT(torch.nn.Module):
     def __init__(self, in_feats, out_feats, num_heads):
         super(GAT, self).__init__()
@@ -92,8 +89,8 @@ class GAT(torch.nn.Module):
         h_gat = F.relu(h)
 
         return h_gat
-             
-        
+
+# The parameters of the network are 40922
 class Net_chan5p1(torch.nn.Module):
     def __init__(self, in_feats=14, num_heads=8, out_feats=16, num_class=10):
         super(Net_chan5p1, self).__init__()
@@ -138,54 +135,8 @@ class Net_chan5p1(torch.nn.Module):
         y = self.fc(x)
 
         return y
-        
-        
-class Net_chan5p2(torch.nn.Module):
-    def __init__(self, in_feats=14, num_heads=8,out_feats=16, num_class=10):
-        super(Net_chan5p2, self).__init__()
-        self.mlp = MLP(96, 64, 32)
 
-        self.gat1 = GAT(in_feats=in_feats, out_feats=16, num_heads=num_heads) # GAT的std
-
-        self.gcn1 = GCN(in_feats=16,out_feats=48)
-        
-        self.gat2 = GAT(in_feats=48, out_feats=128, num_heads=num_heads//4) # GAT的std
-        
-
-        self.drop = torch.nn.Dropout(0.3)
-        self.fc = nn.Linear(128 + 32, num_class)
-
-    def forward(self, data):
-        x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr
-        batch = data.batch
-        
-        unique_values, counts = torch.unique(batch, return_counts=True)
-        num_graphs = unique_values.numel() # 子图个数
-        
-        # print(batch.shape) # torch.Size([8428])
-        
-        glcm = data.glcm.reshape(num_graphs, -1) 
-        # print('000000000000000',glcm.shape) # 32,96
-        glcm = self.mlp(glcm)
-
-        h = self.gat1(x, edge_index,edge_attr)
-
-        h = self.gcn1(h, edge_index)
-        
-        h = self.gat2(h, edge_index,edge_attr)
-        
-
-        h = global_mean_pool(h, batch)
-        h = self.drop(h)
-        
-        x = torch.cat([h, glcm], dim=1)
-
-        y = self.fc(x)
-
-        return y
-        
-
-#14-24
+# The parameters of the network are 47122
 class Net_chan5p3(torch.nn.Module):
     def __init__(self, in_feats=14, num_heads=8,out_feats=16, num_class=10):
         super(Net_chan5p3, self).__init__()
@@ -229,103 +180,11 @@ class Net_chan5p3(torch.nn.Module):
         y = self.fc(x)
 
         return y
-        
-        
-class Net_chan5p4(torch.nn.Module):
-    def __init__(self, in_feats=14, num_heads=8,out_feats=16, num_class=10):
-        super(Net_chan5p4, self).__init__()
-        self.mlp = MLP(96, 64, 32)
 
-        self.gat1 = GAT(in_feats=in_feats, out_feats=24, num_heads=num_heads) # GAT的std
-
-        self.gcn1 = GCN(in_feats=24,out_feats=48)
-        
-        self.gat2 = GAT(in_feats=48, out_feats=128, num_heads=num_heads//4) # GAT的std
-        
-
-        self.drop = torch.nn.Dropout(0.3)
-        self.fc = nn.Linear(128 + 32, num_class)
-
-    def forward(self, data):
-        x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr
-        batch = data.batch
-        
-        unique_values, counts = torch.unique(batch, return_counts=True)
-        num_graphs = unique_values.numel() # 子图个数
-        
-        # print(batch.shape) # torch.Size([8428])
-        
-        glcm = data.glcm.reshape(num_graphs, -1) 
-        # print('000000000000000',glcm.shape) # 32,96
-        glcm = self.mlp(glcm)
-
-        h = self.gat1(x, edge_index,edge_attr)
-
-        h = self.gcn1(h, edge_index)
-        
-        h = self.gat2(h, edge_index,edge_attr)
-        
-
-        h = global_mean_pool(h, batch)
-        h = self.drop(h)
-        
-        x = torch.cat([h, glcm], dim=1)
-
-        y = self.fc(x)
-
-        return y
-        
-        
-class Net_chan5p5(torch.nn.Module):
-    def __init__(self, in_feats=14, num_heads=8, out_feats=16,num_class=10):
-        super(Net_chan5p5, self).__init__()
-        self.mlp = MLP(96, 64, 32)
-
-        self.gat1 = GAT(in_feats=in_feats, out_feats=24, num_heads=num_heads) # GAT的std
-
-        self.gcn1 = GCN(in_feats=24,out_feats=64)
-        
-        self.gat2 = GAT(in_feats=64, out_feats=128, num_heads=num_heads//4) # GAT的std
-        
-
-        self.drop = torch.nn.Dropout(0.3)
-        self.fc = nn.Linear(128 + 32, num_class)
-
-    def forward(self, data):
-        x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr
-        batch = data.batch
-        
-        unique_values, counts = torch.unique(batch, return_counts=True)
-        num_graphs = unique_values.numel() # 子图个数
-        
-        # print(batch.shape) # torch.Size([8428])
-        
-        glcm = data.glcm.reshape(num_graphs, -1) 
-        # print('000000000000000',glcm.shape) # 32,96
-        glcm = self.mlp(glcm)
-
-        h = self.gat1(x, edge_index,edge_attr)
-
-        h = self.gcn1(h, edge_index)
-        
-        h = self.gat2(h, edge_index,edge_attr)
-        
-
-        h = global_mean_pool(h, batch)
-        h = self.drop(h)
-        
-        x = torch.cat([h, glcm], dim=1)
-
-        y = self.fc(x)
-
-        return y
-        
-        
-        
-        
-class Net_chan5p6(torch.nn.Module):
+# The parameters of the network are 71890
+class Net_chan5p2(torch.nn.Module):
   def __init__(self, in_feats=14, num_heads=8,out_feats=16, num_class=10):
-      super(Net_chan5p6, self).__init__()
+      super(Net_chan5p2, self).__init__()
       self.mlp = MLP(96, 64, 32)
 
       self.gat1 = GAT(in_feats=in_feats, out_feats=24, num_heads=num_heads) # GAT的std

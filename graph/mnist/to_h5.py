@@ -17,7 +17,7 @@ import os
 if __name__ == '__main__':
 
     
-    dataFile = '/mnist.mat'
+    dataFile = '../../datasets/mnist.mat'
     data = scio.loadmat(dataFile)
     traindata = np.double(data['train_x']) 
     trainlabel = np.double(data['train_y'])
@@ -36,9 +36,7 @@ if __name__ == '__main__':
         label_i = np.argmax(trainlabel[i])
         center_array_i, adj_i, edge_attr = get_boundary(traindata[i])
 
-        # print(traindata.data[i])
         glcm_i = GLCM(traindata[i])
-        
 
         f1 = h5py.File(os.path.join(train_dir, str(i) + '_' + str(label_i) + ".h5"), 'w')
         f1.create_dataset('x', data=center_array_i)

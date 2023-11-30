@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2023/4/3 22:40
 # @Author  : lan
-# @File    : find_boundary.py
 # @Software: PyCharm
 import networkx as nx
 # import skimage.future.graph as graph
@@ -122,7 +120,7 @@ def get_boundary(img, K=100, M=10):
         for j in range(0, 112, 14):
             pos_dict[count] = [(i + i + 14) // 2, (j + j + 14) // 2]
 
-            label_patch = labels[i:i + 14, j:j + 14] #？？
+            label_patch = labels[i:i + 14, j:j + 14]
 
             flat_labels = [label for row in label_patch for label in row]
             # Count the number of each label
@@ -168,7 +166,7 @@ def get_boundary(img, K=100, M=10):
         
             weight = node_counts[res[kk][0]-1][pix_label]/pixel_nums[pix_label-1]+node_counts[res[kk][1]-1][pix_label]/pixel_nums[pix_label-1]
             
-            if weight >= 0.9:
+            if weight >= 0:
                 all_res.append((res[kk][0],res[kk][1],weight))
                 all_weight.append(weight)
                 theLine += 1
@@ -176,7 +174,7 @@ def get_boundary(img, K=100, M=10):
     G.add_weighted_edges_from(all_res)  # Connect a line to each of the permutations
     print('theLine--------------',theLine)
     # The node number of G is 1-64, and the connection of adj side also starts with 1.
-    # print('G', G)
+
 
     # print('pos_dict', pos_dict)
     # nx.draw_networkx_nodes(G, pos_dict, node_size=1, node_color='black')  
@@ -192,11 +190,86 @@ def get_boundary(img, K=100, M=10):
         b = pos_dict[adj[1][i]]
         dis = (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2
         wei = G.get_edge_data(adj[0][i], adj[1][i])['weight']
-        edge_attr[i] = [dis, wei] 
+        edge_attr[i] = [dis, wei]
 
+        print('G=========', G)
+
+        ########################################## The Visualization ##################################################
+        '''
+        You can ignore this code
+        '''
+        # plt.imshow(G)
+        # plt.imshow(image)
+        # plt.show()
+
+        # plt.savefig("test_bird_" + str(K) + "_" + str(M) + ".svg")
+
+        # Obtain superpixel boundary position information/draw the image and boundary on the original image
+        boundaries = find_boundaries(labels)
+        # out = mark_boundaries(image, labels, color=[1, 1, 0])
+        # plt.imshow(out)
+        # plt.show()
+
+        # # Visualize boundary information (original image + boundary)
+        # image[boundaries] = [122, 150, 171]
+        # io.imshow(image)
+        # io.show()
+        # io.imsave('boundery.png', image)
+
+        # # Represent regions with different colors (regions + boundary)
+        # out_patch = color.label2rgb(segments, image, kind='avg')
+        # io.imshow(out_patch)
+        # io.show()
+        # io.imsave('tiles.png', out_patch)
+
+        # Draw grid lines + tiles patch
+        # grid_step = 16
+        # out_patch = color.label2rgb(segments, image, kind='avg')
+        # for i in range(out_patch.shape[0]):
+        #     for j in range(out_patch.shape[1]):
+        #         if i % grid_step == 0 or j % grid_step == 0:
+        #             out_patch[i, j] = [166, 160, 156]
+        # io.imshow(out_patch)
+        # io.show()
+        # io.imsave('tiles_grid.png', out_patch)
+
+        # # Display region segmentation results
+        # # Simplify the graph G and only keep edges with weight greater than 0.1
+        # H = nx.Graph()
+        # for i in range(0, 196):
+        #     H.add_node(i)
+        # for u, v, wt in G.edges.data('weight'):
+        #     if wt > 0.1:
+        #         H.add_edge(u-1, v-1, weight=wt)
+        # print('Hb0.1',H)
+
+
+        # # Display region segmentation results
+        # out_patch = color.label2rgb(segments, image, kind='avg')
+        # Traverse nodes and draw circles
+        # for node in H.nodes:
+        #     x_idx, y_idx = node // 14, node % 14
+        #     x_center, y_center = x_idx * 16 + 8, y_idx * 16 + 8
+        #     print('node, center', node, x_center, y_center)
+        #     cv2.circle(out_patch, (y_center, x_center), radius=1, color=(89, 64, 69), thickness=-1)
+
+        # # Traverse edges and draw line segments
+        # for edge in H.edges:
+        #     start_node, end_node = edge
+        #     start_x_idx, start_y_idx = start_node // 14, start_node % 14
+        #     end_x_idx, end_y_idx = end_node // 14, end_node % 14
+        #     start_x_center, start_y_center = start_x_idx * 16 + 8, start_y_idx * 16 + 8
+        #     end_x_center, end_y_center = end_x_idx * 16 + 8, end_y_idx * 16 + 8
+        #     print('start_node, end_node',start_node, end_node)
+        #     print('edge,', start_x_center,start_y_center,end_x_center,end_y_center)
+        #     cv2.line(out_patch, (start_x_center,start_y_center ), (end_x_center, end_y_center ), color=(52, 31, 22),
+        #              thickness=1)  # Draw line segments on region segmentation results
+
+        # io.imshow(out_patch)
+        # io.show()
+        # io.imsave('cat_patch_line_graph.png', out_patch)
+
+        ########################################## The Visualization ##################################################
 
     return List_node, adj, edge_attr
 
-
-if __name__ == '__main__':
-    get_boundary('../cifar10.jpg')

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2023/4/29 19:59
 # @Author  : lan
-# @File    : train_cifar.py
 # @Software: PyCharm
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = '1,2,3'
@@ -19,7 +17,7 @@ import argparse
 from torch.utils.tensorboard import SummaryWriter
 
 import numpy as np
-
+import torch_geometric
 from torch.utils.data import Dataset  # , DataLoader
 from torch_geometric.data import Data, DataListLoader  # DataLoader
 
@@ -157,15 +155,15 @@ class MyDataset(Dataset):
     def __init__(self, data_dir, split='train'):
         self.data_dir = data_dir
         self.split = split
-        self.filenames = os.listdir(os.path.join(self.data_dir, self.split))  # 获取所有的 H5 文件名
+        self.filenames = os.listdir(os.path.join(self.data_dir, self.split))
 
     def __getitem__(self, idx):
         filename = self.filenames[idx]
         with h5py.File(os.path.join(self.data_dir, self.split, filename), 'r') as f:
-            x = torch.as_tensor(np.array(f['x'])[:, :14], dtype=torch.float)  # 读取节点特征
-            edge_index = torch.as_tensor(np.array(f['edge_index']) - 1, dtype=torch.long)  # 读取邻接矩阵
-            edge_attr = torch.as_tensor(np.array(f['edge_attr']), dtype=torch.float)  # 读取边的特征
-            y = torch.as_tensor(np.array(f['y']), dtype=torch.int)  # 读取标签
+            x = torch.as_tensor(np.array(f['x'])[:, :14], dtype=torch.float)  # node features
+            edge_index = torch.as_tensor(np.array(f['edge_index']) - 1, dtype=torch.long)  # adjacency matrix
+            edge_attr = torch.as_tensor(np.array(f['edge_attr']), dtype=torch.float)  # edge features
+            y = torch.as_tensor(np.array(f['y']), dtype=torch.int)  # labels
             sample = Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y)
         return sample
 
@@ -202,10 +200,9 @@ def train(args):
     gpu_group = str2list(args.gpu, type='int')
     print('gpu_group', gpu_group)
     print("*" * 15, "\nif cuda available:{},and will use gpu:{}".format(use_gpu, args.gpu))
-    # print("total %d epochs, batch_size %d" % (args.epochs, args.batch_size))
 
-    # init  GCNmodel
-    model = Net_chan5p1(in_feats=args.num_features, num_heads=args.num_heads, num_class=args.num_classes)
+    # init  model
+    model = Net_chan5p4(in_feats=args.num_features, num_heads=args.num_heads, num_class=args.num_classes)
     global_step = 0
     total_steps = args.total_steps
     best_test_acc = 0

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2023/4/3 22:40
 # @Author  : lan
-# @File    : find_boundary.py
 # @Software: PyCharm
 import networkx as nx
 # import skimage.future.graph as graph
@@ -154,7 +152,7 @@ def get_boundary(img, K=100, M=10): # 200  150
         
             weight = node_counts[res[kk][0]-1][pix_label]/pixel_nums[pix_label-1]+node_counts[res[kk][1]-1][pix_label]/pixel_nums[pix_label-1]
             
-            if weight >= 0.9:
+            if weight >= 0:
                 all_res.append((res[kk][0],res[kk][1],weight))
                 all_weight.append(weight)
                 theLine += 1
@@ -185,4 +183,5 @@ def get_boundary(img, K=100, M=10): # 200  150
 
 
 if __name__ == '__main__':
-    get_boundary('../cifar10.jpg')
+    img = cv2.imread('../test.jpg')
+    get_boundary(img)

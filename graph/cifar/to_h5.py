@@ -14,16 +14,12 @@ import os
 
 if __name__ == '__main__':
 
-
     # Cifar10 dataset 
-    traindata = dsets.CIFAR10(root='/datasets/CIFAR10/', train=True, download=True)
-    testdata = dsets.CIFAR10(root='/datasets/CIFAR10/', train=False, download=True)
-
-
+    traindata = dsets.CIFAR10(root='../../datasets/CIFAR10/', train=True, download=True)
+    testdata = dsets.CIFAR10(root='../../datasets/CIFAR10/', train=False, download=True)
 
     train_dir = './cifar_h5/train/'
     test_dir = "./cifar_h5/test/"
-
 
     print("start....")
     for i in range(50000):
@@ -31,7 +27,6 @@ if __name__ == '__main__':
         center_array_i, adj_i, edge_attr = get_boundary(traindata.data[i])
 
         glcm_i = GLCM(traindata.data[i])
-        
 
         f1 = h5py.File(os.path.join(train_dir, str(i) + '_' + str(label_i) + ".h5"), 'w')
         f1.create_dataset('x', data=center_array_i)
